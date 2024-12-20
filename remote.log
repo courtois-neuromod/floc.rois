@@ -1,0 +1,1 @@
+3956c1aa-fc3b-4ce4-b1a2-759e5ea1b9b2 autoenable=true bucket=cneuromod.floc.rois chunk=1GiB datacenter=US encryption=none host=s3.unf-montreal.ca name=unfs3.cneuromod.floc.rois port=443 protocol=https requeststyle=path storageclass=STANDARD type=S3 timestamp=1734727394.507007348s
