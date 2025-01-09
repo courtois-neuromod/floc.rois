@@ -1,6 +1,9 @@
 **/.git* annex.largefiles=nothing
 * annex.largefiles=(largerthan=100kb)
 *.json annex.largefiles=nothing
+*.nii annex.largefiles=anything
+*.nii.gz annex.largefiles=anything
+*.h5 annex.largefiles=anything
 *.txt annex.largefiles=nothing
 *.tsv annex.largefiles=nothing
 *.py annex.largefiles=nothing

@@ -126,8 +126,8 @@ def create_subject_rois(
             for i, h in enumerate(hemi):
                 parcel = nib.load(
                     f"{data_dir}/fLoc/rois/sub-{sub_num}/rois/from_atlas/"
-                    f"sub-{sub_num}_parcel-kanwisher_space-T1w_contrast-"
-                    f"{roi}_desc-{h}_mask.nii",
+                    f"sub-{sub_num}_parcel-kanwisher_space-T1w_res-anat_"
+                    f"contrast-{roi}_desc-{h}_pseg.nii.gz",
                 )
 
                 """
@@ -136,6 +136,17 @@ def create_subject_rois(
                 """
                 rs_parcel = nilearn.image.resample_to_img(
                     parcel, dmap, interpolation='continuous',
+                )
+                # Save ROI mask from atlas in subject space at functional res
+                rs_mask = nib.nifti1.Nifti1Image(
+                    (rs_parcel.get_fdata() > 0.5).astype(int),
+                    affine=rs_parcel.affine,
+                )
+                nib.save(
+                    rs_mask,
+                    f"{data_dir}/fLoc/rois/sub-{sub_num}/rois/from_atlas/"
+                    f"sub-{sub_num}_parcel-kanwisher_space-T1w_res-func_"
+                    f"contrast-{roi}_desc-{h}_mask.nii.gz",
                 )
                 rs_parcel = nib.nifti1.Nifti1Image(
                     (rs_parcel.get_fdata() > 0.001).astype(int),
@@ -280,8 +291,8 @@ def create_subject_rois_noData(
             for i, h in enumerate(hemi):
                 parcel = nib.load(
                     f"{data_dir}/fLoc/rois/sub-{sub_num}/rois/from_atlas/"
-                    f"sub-{sub_num}_parcel-kanwisher_space-T1w_contrast-"
-                    f"{roi}_desc-{h}_mask.nii",
+                    f"sub-{sub_num}_parcel-kanwisher_space-T1w_res-anat_"
+                    f"contrast-{roi}_desc-{h}_pseg.nii.gz",
                 )
 
                 """
@@ -292,6 +303,17 @@ def create_subject_rois_noData(
                     parcel,
                     noiseceil,
                     interpolation='continuous',
+                )
+                # Save ROI mask from atlas in subject space at functional res
+                rs_mask = nib.nifti1.Nifti1Image(
+                    (rs_parcel.get_fdata() > 0.5).astype(int),
+                    affine=rs_parcel.affine,
+                )
+                nib.save(
+                    rs_mask,
+                    f"{data_dir}/fLoc/rois/sub-{sub_num}/rois/from_atlas/"
+                    f"sub-{sub_num}_parcel-kanwisher_space-T1w_res-func_"
+                    f"contrast-{roi}_desc-{h}_mask.nii.gz",
                 )
                 rs_parcel = nib.nifti1.Nifti1Image(
                     (rs_parcel.get_fdata() > 0.001).astype(int),

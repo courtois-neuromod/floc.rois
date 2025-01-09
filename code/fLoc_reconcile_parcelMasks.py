@@ -79,7 +79,7 @@ def create_subject_parcels(
         # load and process subject-specific parcel warped from CVS to MNI to T1w space
         parcel = nib.load(
             f"{data_dir}/sub-{sub_num}/rois/from_atlas/"
-            f"sub-{sub_num}_parcel-kanwisher_space-T1w_contrast-{c}_mask.nii" # TODO: rename probseg?
+            f"sub-{sub_num}_parcel-kanwisher_space-T1w_res-anat_contrast-{c}_pseg.nii.gz"
         )
         # transform probseg mask into binary mask
         parcel = nib.nifti1.Nifti1Image(
@@ -89,6 +89,11 @@ def create_subject_parcels(
         # resample parcel to functional space
         rs_parcel = nilearn.image.resample_to_img(
             parcel, dmap_k, interpolation='nearest',
+        )
+        nib.save(
+            rs_parcel,
+            f"{data_dir}/sub-{sub_num}/rois/from_atlas/"
+            f"sub-{sub_num}_parcel-kanwisher_space-T1w_res-func_contrast-{c}_mask.nii.gz"
         )
 
         thresh_dmap_k, tshold_k = threshold_stats_img(

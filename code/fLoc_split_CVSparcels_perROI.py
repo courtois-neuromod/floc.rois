@@ -120,19 +120,19 @@ def split_rois(data_dir):
                 left_mask,
                 f"{data_dir}/standard_masks/standard_rois/"
                 f"parcel-kanwisher_space-CVSavg35_contrast-{c}_roi-{roi}_"
-                "desc-L_mask.nii",
+                "desc-L_mask.nii.gz",
             )
             nib.save(
                 right_mask,
                 f"{data_dir}/standard_masks/standard_rois/"
                 f"parcel-kanwisher_space-CVSavg35_contrast-{c}_roi-{roi}_"
-                "desc-R_mask.nii",
+                "desc-R_mask.nii.gz",
             )
             nib.save(
                 bilat_mask,
                 f"{data_dir}/standard_masks/standard_rois/"
                 f"parcel-kanwisher_space-CVSavg35_contrast-{c}_roi-{roi}_"
-                "desc-bilat_mask.nii",
+                "desc-bilat_mask.nii.gz",
             )
 
 
