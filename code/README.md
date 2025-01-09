@@ -49,7 +49,7 @@ python fLoc_firstLevel_nilearn.py --fLoc_dir="${BOLDDIR}" --out_dir="${OUTDIR}" 
 Note that the script can process scans in MNI or subject (T1w) space (default is T1w)
 
 **Output**:
-- Two mask files generated from the union of the run ``_mask.nii.gz`` files saved with the _bold.nii.gz files. ``sub-{sub_num}_task-things_space-T1w_label-brain_desc-unionNonNaN_mask.nii`` includes the voxels with signal across all functional runs, and ``sub-{sub_num}_task-things_space-T1w_label-brain_desc-unionNaN_mask.nii`` includes voxels that lack signal in at least one run (to be excluded).  
+- Two mask files generated from the union of the run ``_mask.nii.gz`` files saved with the _bold.nii.gz files. ``sub-{sub_num}_task-things_space-T1w_label-brain_desc-unionNonNaN_mask.nii.gz`` includes the voxels with signal across all functional runs, and ``sub-{sub_num}_task-things_space-T1w_label-brain_desc-unionNaN_mask.nii.gz`` includes voxels that lack signal in at least one run (to be excluded).  
 - One volume of t-scores and one of beta values (``sub-{sub_num}_task-floc_space-T1w_model-GLM_stats-{tscores, betas}_contrast-{contrast}_desc-{smooth, unsmooth}_statseries.nii.gz``) for each of the 9 GLM contrasts listed below.
 - The following four contrasts are as specified in the work of the Kanwisher group:
 > * ``faceMinObject``: face > object
@@ -67,11 +67,11 @@ Note that the script can process scans in MNI or subject (T1w) space (default is
 
 ## Step 3. Warp Kanwisher group parcels and ROI masks from normalized CVS space into subject (T1w) space
 
-To obtain ROI masks in subject space, we started from normalized (CVS space) parcels of voxels with face, body, scene and object preferences in derived from n=40 individuals by the Kanwisher group.
+To obtain ROI masks in subject space, we started from normalized (CVS space) parcels of voxels with face, body, scene and object preferences derived from n=40 individuals by the Kanwisher group.
 
 CVS parcels (CVS space, ``cvs_avg35`` template, n=40 subjects) in ``.nii`` format were downloaded from the Kanwisher group's website [here](https://web.mit.edu/bcs/nklab/GSS.shtml#download). ``cvs_*parcels.zip`` files were saved and unzipped directly under ``fLoc/rois/standard_masks/kanwisher_parcels/cvs``
 
-The following command lines derive ROI masks from those group parcels, and warp the parcels and ROI masks from CVS to MNI to subject (T1w) space.
+The following command lines derive ROI masks from those group parcels, and warp the parcels and ROI masks from CVS to MNI to native subject (T1w) space.
 
 ### 3.1 Extract normalized (CVS) ROI masks from group parcels (e.g., FFA, PPA)
 
@@ -93,8 +93,9 @@ python fLoc_split_CVSparcels_perROI.py --data_dir="${DATADIR}"
 
 **Input**:
 - the Kanwisher ROI files for each contrast (face, scene, object, body; e.g., ``cvs_scene_parcels/cvs_scene_parcels/fROIs-fwhm_5-0.0001.nii``)
+
 **Output**:
-- For each contrast (face, scene, body, object), a series of binary ROI masks in ``cvs_avg35`` space (e.g., ``parcel-kanwisher_space-CVSavg35_contrast-face_roi-{FFA, OFA, pSTS}_desc-{L, R, bilat}_mask.nii``). Note that, for each ROI label, the script produces a left, a right and a bilateral mask.
+- For each contrast (face, scene, body, object), a series of binary ROI masks in ``cvs_avg35`` space (e.g., ``parcel-kanwisher_space-CVSavg35_contrast-face_roi-{FFA, OFA, pSTS}_desc-{L, R, bilat}_mask.nii.gz``). Note that, for each ROI label, the script produces a left, a right and a bilateral mask.
 
 
 ### 3.2 Warp parcels and ROI masks from CVS to MNI space
@@ -112,7 +113,7 @@ Type, from anywhere:
 mni152reg --s cvs_avg35
 ```
 
-Third, warp the Kanwisher parcels from CVS to MNI152 space for each contrast (face, scene, body, scene).
+Third, warp the binary Kanwisher parcels from CVS to MNI152 space for each contrast (face, scene, body, scene).
 ```bash
 PARCELDIR="cneuromod-things/fLoc/rois/standard_masks/kanwisher_parcels"
 
@@ -120,30 +121,31 @@ for PARAM in body face object scene
 do
   mri_vol2vol --targ ${PARCELDIR}/cvs/cvs_${PARAM}_parcels/cvs_${PARAM}_parcels/fROIs-fwhm_5-0.0001.nii \
   --mov ${FSLDIR}/data/standard/MNI152_T1_2mm.nii.gz \
-  --o ${PARCELDIR}/mni/parcel-kanwisher_space-MNI152T1_res-2mm_contrast-${PARAM}_mask.nii \
+  --o ${PARCELDIR}/mni/parcel-kanwisher_space-MNI152T1_res-2mm_contrast-${PARAM}_pseg.nii.gz \
   --inv --reg ${SUBJECTS_DIR}/cvs_avg35/mri/transforms/reg.mni152.2mm.dat
 done
 ```
 
-Fourth, warp the Kanwisher ROI masks from CVS to MNI152 space for each ROI
+Fourth, warp the binary Kanwisher ROI masks from CVS to MNI152 space for each ROI.
+Note: warped masks are probabilistic segmentations.
 ```bash
 ROIDIR="cneuromod-things/fLoc/rois/standard_masks/standard_rois"
 
 for PARAM in body_roi-EBA face_roi-FFA face_roi-OFA face_roi-pSTS scene_roi-MPA scene_roi-OPA scene_roi-PPA
 do
-  mri_vol2vol --targ ${ROIDIR}/parcel-kanwisher_space-CVSavg35_contrast-${PARAM}_desc-bilat_mask.nii \
+  mri_vol2vol --targ ${ROIDIR}/parcel-kanwisher_space-CVSavg35_contrast-${PARAM}_desc-bilat_mask.nii.gz \
   --mov $FSLDIR/data/standard/MNI152_T1_2mm.nii.gz \
-  --o ${ROIDIR}/parcel-kanwisher_space-MNI152T1_contrast-${PARAM}_desc-bilat_mask.nii \
+  --o ${ROIDIR}/parcel-kanwisher_space-MNI152T1_contrast-${PARAM}_desc-bilat_pseg.nii.gz \
   --inv --reg ${SUBJECTS_DIR}/cvs_avg35/mri/transforms/reg.mni152.2mm.dat
 
-  mri_vol2vol --targ ${ROIDIR}/parcel-kanwisher_space-CVSavg35_contrast-${PARAM}_desc-L_mask.nii \
+  mri_vol2vol --targ ${ROIDIR}/parcel-kanwisher_space-CVSavg35_contrast-${PARAM}_desc-L_mask.nii.gz \
   --mov $FSLDIR/data/standard/MNI152_T1_2mm.nii.gz \
-  --o ${ROIDIR}/parcel-kanwisher_space-MNI152T1_contrast-${PARAM}_desc-L_mask.nii \
+  --o ${ROIDIR}/parcel-kanwisher_space-MNI152T1_contrast-${PARAM}_desc-L_pseg.nii.gz \
   --inv --reg ${SUBJECTS_DIR}/cvs_avg35/mri/transforms/reg.mni152.2mm.dat
 
-  mri_vol2vol --targ ${ROIDIR}/parcel-kanwisher_space-CVSavg35_contrast-${PARAM}_desc-R_mask.nii \
+  mri_vol2vol --targ ${ROIDIR}/parcel-kanwisher_space-CVSavg35_contrast-${PARAM}_desc-R_mask.nii.gz \
   --mov $FSLDIR/data/standard/MNI152_T1_2mm.nii.gz \
-  --o ${ROIDIR}/parcel-kanwisher_space-MNI152T1_contrast-${PARAM}_desc-R_mask.nii \
+  --o ${ROIDIR}/parcel-kanwisher_space-MNI152T1_contrast-${PARAM}_desc-R_pseg.nii.gz \
   --inv --reg ${SUBJECTS_DIR}/cvs_avg35/mri/transforms/reg.mni152.2mm.dat
 done
 ```
@@ -168,9 +170,9 @@ do
     OUTSUB="${OUTDIR}/sub-${SUBNUM}/rois/from_atlas"
 
     antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 \
-    --input ${PARCELDIR}/parcel-kanwisher_space-MNI152T1_res-2mm_contrast-${PARAM}_mask.nii \
+    --input ${PARCELDIR}/parcel-kanwisher_space-MNI152T1_res-2mm_contrast-${PARAM}_pseg.nii.gz \
     --interpolation Linear \
-    --output ${OUTSUB}/sub-${SUBNUM}_parcel-kanwisher_space-T1w_contrast-${PARAM}_mask.nii \
+    --output ${OUTSUB}/sub-${SUBNUM}_parcel-kanwisher_space-T1w_res-anat_contrast-${PARAM}_pseg.nii.gz \
     --reference-image ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_desc-preproc_T1w.nii.gz \
     --transform ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_from-MNI152NLin2009cAsym_to-T1w_mode-image_xfm.h5
   done
@@ -178,6 +180,7 @@ done
 ```
 
 Second, warp the Kanwisher ROI masks from MNI152 to T1w.
+Note: warped masks are probabilistic segmentations.
 ```bash
 ROIDIR="cneuromod-things/fLoc/rois/standard_masks/standard_rois"
 OUTDIR="cneuromod-things/fLoc/rois"
@@ -190,30 +193,30 @@ do
     OUTSUB="${OUTDIR}/sub-${SUBNUM}/rois/from_atlas"
 
     antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 \
-    --input ${ROIDIR}/parcel-kanwisher_space-MNI152T1_contrast-${PARAM}_desc-bilat_mask.nii \
+    --input ${ROIDIR}/parcel-kanwisher_space-MNI152T1_contrast-${PARAM}_desc-bilat_pseg.nii.gz \
     --interpolation Linear \
-    --output ${OUTSUB}/sub-${SUBNUM}_parcel-kanwisher_space-T1w_contrast-${PARAM}_desc-bilat_mask.nii \
+    --output ${OUTSUB}/sub-${SUBNUM}_parcel-kanwisher_space-T1w_res-anat_contrast-${PARAM}_desc-bilat_pseg.nii.gz \
     --reference-image ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_desc-preproc_T1w.nii.gz \
     --transform ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_from-MNI152NLin2009cAsym_to-T1w_mode-image_xfm.h5
 
     antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 \
-    --input ${ROIDIR}/parcel-kanwisher_space-MNI152T1_contrast-${PARAM}_desc-L_mask.nii \
+    --input ${ROIDIR}/parcel-kanwisher_space-MNI152T1_contrast-${PARAM}_desc-L_pseg.nii.gz \
     --interpolation Linear \
-    --output ${OUTSUB}/sub-${SUBNUM}_parcel-kanwisher_space-T1w_contrast-${PARAM}_desc-L_mask.nii \
+    --output ${OUTSUB}/sub-${SUBNUM}_parcel-kanwisher_space-T1w_res-anat_contrast-${PARAM}_desc-L_pseg.nii.gz \
     --reference-image ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_desc-preproc_T1w.nii.gz \
     --transform ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_from-MNI152NLin2009cAsym_to-T1w_mode-image_xfm.h5
 
     antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 \
-    --input ${ROIDIR}/parcel-kanwisher_space-MNI152T1_contrast-${PARAM}_desc-R_mask.nii \
+    --input ${ROIDIR}/parcel-kanwisher_space-MNI152T1_contrast-${PARAM}_desc-R_pseg.nii.gz \
     --interpolation Linear \
-    --output ${OUTSUB}/sub-${SUBNUM}_parcel-kanwisher_space-T1w_contrast-${PARAM}_desc-R_mask.nii \
+    --output ${OUTSUB}/sub-${SUBNUM}_parcel-kanwisher_space-T1w_res-anat_contrast-${PARAM}_desc-R_pseg.nii.gz \
     --reference-image ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_desc-preproc_T1w.nii.gz \
     --transform ${SPREPDIR}/sub-${SUBNUM}/anat/sub-${SUBNUM}_from-MNI152NLin2009cAsym_to-T1w_mode-image_xfm.h5
   done
 done
 ```
 
-All parcels and ROI masks in subject space are saved under ``fLoc/rois/sub-{sub_num}/rois/from_atlas``. There are three masks per ROI (left hemisphere, right hemisphere, and bilateral).
+All parcels and ROI masks in subject space are saved under ``fLoc/rois/sub-{sub_num}/rois/from_atlas``. There are three probabilistic masks per ROI (left hemisphere, right hemisphere, and bilateral).
 
 ------------
 
@@ -231,9 +234,10 @@ python fLoc_reconcile_parcelMasks.py --data_dir="${DATADIR}" --alpha=0.0001 --su
 
 **Input**:
 - ``sub-{sub_num}_task-floc_space-T1w_model-GLM_stats-tscores_contrast-*_desc-{smooth, unsmooth}_statseries.nii.gz``, subjects' t-score maps from each of the contrasts (kanwisher-style and NSD-style) generated in Step 2.
--  ``sub-{sub_num}_parcel-kanwisher_space-T1w_contrast-{body, face, object, scene}_mask.nii``, parcel masks warped to subjects' native T1w space for the face, scene, body and object contrasts generated in Step 3
+-  ``sub-{sub_num}_parcel-kanwisher_space-T1w_res-anat_contrast-{body, face, object, scene}_pseg.nii.gz``, parcel masks warped to subjects' native T1w space for the face, scene, body and object contrasts generated in Step 3.
 
 **Output**:
+-  ``sub-{sub_num}_parcel-kanwisher_space-T1w_res-func_contrast-{body, face, object, scene}_mask.nii.gz``, binarized parcel masks (from atlas) resampled to match subjects' functional (epi) resolution.
 - For each constrast, ``sub-{sub_num}_task-floc_space-T1w_stats-tscores_contrast-*_cutoff-*_desc-{smooth, unsmooth}_mask.nii.gz``, a parcel mask in subject space (``.nii.gz``) that corresponds to the union between the warped group parcel and the voxels with t-scores above the specified alpha threshold in the subject's contrast map. A parcel is created using both the Kanwisher-style (e.g. face > object) and the NSD-style (face > [object, body. scene, character]) fLoc contrast.
 
 ------------
@@ -286,9 +290,10 @@ python fLoc_reconcile_ROImasks.py \
 **Input**:
 - ``sub-{sub_num}_task-floc_space-T1w_model-GLM_stats-tscores_contrast-*_desc-{smooth, unsmooth}_statseries.nii.gz``, subjects' t-score maps generated in Step 2
 - Alternatively (when no t-score map is available), ``THINGS/things.glmsingle/sub-{sub_num}/glmsingle/output/sub-{sub_num}_task-things_space-T1w_model-fitHrfGLMdenoiseRR_stats-noiseCeilings_statmap.nii.gz``, noise-ceiling brain maps derived from the main THINGS task.
-- ``sub-{sub_num}_parcel-kanwisher_space-T1w_contrast-*_desc-{L, R}_mask.nii``, group-derived ROI masks warped to subjects' native (T1w) space computed in Step 3.
+- ``sub-{sub_num}_parcel-kanwisher_space-T1w_res-anat_contrast-*_desc-{L, R}_pseg.nii.gz``, group-derived ROI masks warped to subjects' native (T1w) space computed in Step 3.
 
 **Output**:
+-  ``sub-{sub_num}_parcel-kanwisher_space-T1w_res-func_contrast-*_desc-{L, R}_mask.nii.gz``, binarized group-derived ROI masks (from atlas) resampled to match subjects' functional (epi) resolution.
 - For each ROI (e.g., ``contrast-face_roi-FFA``), ``sub-{sub_num}_task-floc_space-T1w_stats-tscores_contrast-*_roi-*_cutoff-*_nvox-*_fwhm-*_ratio-*_desc-{smooth, unsmooth}_mask.nii.gz``, an ROI binary mask (volume) in T1w space that corresponds to the union between the group-derived ROI mask (warped to subject space) and voxels with above-cutoff t-scores for the relevant fLoc contrast.
 - For ``sub-06``, who did not complete the fLoc task, ROI masks ``sub-{sub_num}_task-floc_space-T1w_stats-noiseCeil_contrast-*_roi-*_cutoff-*_nvox-*_fwhm-*_mask.nii.gz`` correspond to the union between the group-derived ROI mask and voxels with above-threshold noise ceilings derived from the main THINGS task.
 
