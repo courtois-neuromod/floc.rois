@@ -264,16 +264,16 @@ def run_glm(fmri_img, design_matrices, mask, args):
         )
         t_map.to_filename(
             f"{out_dir}/sub-{sub_num}/glm/sub-{sub_num}_task-floc_"
-            f"space-{data_space}_model-GLM_stats-tscores_contrast-{c_id}_"
-            f"desc-{slabel}_statseries.nii.gz",
+            f"space-{data_space}_model-GLM_stat-tscores_contrast-{c_id}_"
+            f"desc-{slabel}_statmap.nii.gz",
         )
         effect_size = fmri_glm.compute_contrast(
             contrast_val, output_type='effect_size',
         )
         effect_size.to_filename(
             f"{out_dir}/sub-{sub_num}/glm/sub-{sub_num}_task-floc_"
-            f"space-{data_space}_model-GLM_stats-betas_contrast-{c_id}_"
-            f"desc-{slabel}_statseries.nii.gz",
+            f"space-{data_space}_model-GLM_stat-betas_contrast-{c_id}_"
+            f"desc-{slabel}_statmap.nii.gz",
         )
 
 
