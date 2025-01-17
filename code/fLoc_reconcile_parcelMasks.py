@@ -67,13 +67,13 @@ def create_subject_parcels(
         # load subject contrast from fLoc task (kanwisher group)
         dmap_k = nib.load(
             f"{data_dir}/sub-{sub_num}/glm/sub-{sub_num}_task-floc_space-T1w_"
-            f"model-GLM_stats-{dtype}_contrast-{k}_desc-{sm}_statseries.nii.gz"
+            f"model-GLM_stat-{dtype}_contrast-{k}_desc-{sm}_statmap.nii.gz"
         )
 
         # load subject contrast from fLoc task (NSD)
         dmap_n = nib.load(
             f"{data_dir}/sub-{sub_num}/glm/sub-{sub_num}_task-floc_space-T1w_"
-            f"model-GLM_stats-{dtype}_contrast-{n}_desc-{sm}_statseries.nii.gz"
+            f"model-GLM_stat-{dtype}_contrast-{n}_desc-{sm}_statmap.nii.gz"
         )
 
         # load and process subject-specific parcel warped from CVS to MNI to T1w space
@@ -117,7 +117,7 @@ def create_subject_parcels(
         nib.save(
             submask_k,
             f"{data_dir}/sub-{sub_num}/rois/task-derived/"
-            f"sub-{sub_num}_task-floc_space-T1w_stats-{dtype}_contrast-{k}_"
+            f"sub-{sub_num}_task-floc_space-T1w_stat-{dtype}_contrast-{k}_"
             f"cutoff-{tval_k}_desc-{sm}_mask.nii.gz",
         )
 
@@ -142,7 +142,7 @@ def create_subject_parcels(
         nib.save(
             submask_n,
             f"{data_dir}/sub-{sub_num}/rois/task-derived/"
-            f"sub-{sub_num}_task-floc_space-T1w_stats-{dtype}_contrast-{n}_"
+            f"sub-{sub_num}_task-floc_space-T1w_stat-{dtype}_contrast-{n}_"
             f"cutoff-{tval_n}_desc-{sm}_mask.nii.gz",
         )
 

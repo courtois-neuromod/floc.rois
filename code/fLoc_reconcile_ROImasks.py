@@ -98,8 +98,8 @@ def create_subject_rois(
         sm = "smooth" if use_smooth_bold else "unsmooth"
         dmap = nib.load(
             f"{data_dir}/fLoc/rois/sub-{sub_num}/glm/"
-            f"sub-{sub_num}_task-floc_space-T1w_model-GLM_stats-tscores_"
-            f"contrast-{c}_desc-{sm}_statseries.nii.gz"
+            f"sub-{sub_num}_task-floc_space-T1w_model-GLM_stat-tscores_"
+            f"contrast-{c}_desc-{sm}_statmap.nii.gz"
         )
 
         # threshold contrast map (cluster size, uncorrected false positive rate)
@@ -243,7 +243,7 @@ def create_subject_rois(
                 nib.save(
                     final_mask,
                     f"{data_dir}/fLoc/rois/sub-{sub_num}/rois/task-derived"
-                    f"/sub-{sub_num}_task-floc_space-T1w_stats-tscores_"
+                    f"/sub-{sub_num}_task-floc_space-T1w_stat-tscores_"
                     f"contrast-{roi}_cutoff-{tvalue}_nvox-{vcount}_fwhm-{fwhm}_ratio-{percent_cluster}_"
                     f"desc-{sm}_mask.nii.gz",
                 )
@@ -262,7 +262,7 @@ def create_subject_rois_noData(
     # load noise ceiling data
     noiseceil = nib.load(
         f"/{data_dir}/THINGS/glmsingle/sub-{sub_num}/glmsingle/output/"
-        f"sub-{sub_num}_task-things_space-T1w_model-fitHrfGLMdenoiseRR_stats-"
+        f"sub-{sub_num}_task-things_space-T1w_model-fitHrfGLMdenoiseRR_stat-"
         "noiseCeilings_statmap.nii.gz",
     )
 
@@ -375,7 +375,7 @@ def create_subject_rois_noData(
                 nib.save(
                     final_mask,
                     f"{data_dir}/fLoc/rois/sub-{sub_num}/rois/task-derived"
-                    f"/sub-{sub_num}_task-floc_space-T1w_stats-noiseCeil_"
+                    f"/sub-{sub_num}_task-floc_space-T1w_stat-noiseCeil_"
                     f"contrast-{roi}_cutoff-{tvalue}_nvox-{vcount}_fwhm-{fwhm}"
                     f"_mask.nii.gz",
                 )

@@ -50,7 +50,7 @@ Note that the script can process scans in MNI or subject (T1w) space (default is
 
 **Output**:
 - Two mask files generated from the union of the run ``_mask.nii.gz`` files saved with the _bold.nii.gz files. ``sub-{sub_num}_task-things_space-T1w_label-brain_desc-unionNonNaN_mask.nii.gz`` includes the voxels with signal across all functional runs, and ``sub-{sub_num}_task-things_space-T1w_label-brain_desc-unionNaN_mask.nii.gz`` includes voxels that lack signal in at least one run (to be excluded).  
-- One volume of t-scores and one of beta values (``sub-{sub_num}_task-floc_space-T1w_model-GLM_stats-{tscores, betas}_contrast-{contrast}_desc-{smooth, unsmooth}_statseries.nii.gz``) for each of the 9 GLM contrasts listed below.
+- One volume of t-scores and one of beta values (``sub-{sub_num}_task-floc_space-T1w_model-GLM_stat-{tscores, betas}_contrast-{contrast}_desc-{smooth, unsmooth}_statmap.nii.gz``) for each of the 9 GLM contrasts listed below.
 - The following four contrasts are as specified in the work of the Kanwisher group:
 > * ``faceMinObject``: face > object
 > * ``sceneMinObject``: scene > object
@@ -233,12 +233,12 @@ python fLoc_reconcile_parcelMasks.py --data_dir="${DATADIR}" --alpha=0.0001 --su
 ```
 
 **Input**:
-- ``sub-{sub_num}_task-floc_space-T1w_model-GLM_stats-tscores_contrast-*_desc-{smooth, unsmooth}_statseries.nii.gz``, subjects' t-score maps from each of the contrasts (kanwisher-style and NSD-style) generated in Step 2.
+- ``sub-{sub_num}_task-floc_space-T1w_model-GLM_stat-tscores_contrast-*_desc-{smooth, unsmooth}_statmap.nii.gz``, subjects' t-score maps from each of the contrasts (kanwisher-style and NSD-style) generated in Step 2.
 -  ``sub-{sub_num}_parcel-kanwisher_space-T1w_res-anat_contrast-{body, face, object, scene}_pseg.nii.gz``, parcel masks warped to subjects' native T1w space for the face, scene, body and object contrasts generated in Step 3.
 
 **Output**:
 -  ``sub-{sub_num}_parcel-kanwisher_space-T1w_res-func_contrast-{body, face, object, scene}_mask.nii.gz``, binarized parcel masks (from atlas) resampled to match subjects' functional (epi) resolution.
-- For each constrast, ``sub-{sub_num}_task-floc_space-T1w_stats-tscores_contrast-*_cutoff-*_desc-{smooth, unsmooth}_mask.nii.gz``, a parcel mask in subject space (``.nii.gz``) that corresponds to the union between the warped group parcel and the voxels with t-scores above the specified alpha threshold in the subject's contrast map. A parcel is created using both the Kanwisher-style (e.g. face > object) and the NSD-style (face > [object, body. scene, character]) fLoc contrast.
+- For each constrast, ``sub-{sub_num}_task-floc_space-T1w_stat-tscores_contrast-*_cutoff-*_desc-{smooth, unsmooth}_mask.nii.gz``, a parcel mask in subject space (``.nii.gz``) that corresponds to the union between the warped group parcel and the voxels with t-scores above the specified alpha threshold in the subject's contrast map. A parcel is created using both the Kanwisher-style (e.g. face > object) and the NSD-style (face > [object, body. scene, character]) fLoc contrast.
 
 ------------
 ## Step 5. Create union masks between group-derived ROI masks and task-derived t-score maps
@@ -288,14 +288,14 @@ python fLoc_reconcile_ROImasks.py \
 ```
 
 **Input**:
-- ``sub-{sub_num}_task-floc_space-T1w_model-GLM_stats-tscores_contrast-*_desc-{smooth, unsmooth}_statseries.nii.gz``, subjects' t-score maps generated in Step 2
-- Alternatively (when no t-score map is available), ``THINGS/things.glmsingle/sub-{sub_num}/glmsingle/output/sub-{sub_num}_task-things_space-T1w_model-fitHrfGLMdenoiseRR_stats-noiseCeilings_statmap.nii.gz``, noise-ceiling brain maps derived from the main THINGS task.
+- ``sub-{sub_num}_task-floc_space-T1w_model-GLM_stat-tscores_contrast-*_desc-{smooth, unsmooth}_statmap.nii.gz``, subjects' t-score maps generated in Step 2
+- Alternatively (when no t-score map is available), ``THINGS/things.glmsingle/sub-{sub_num}/glmsingle/output/sub-{sub_num}_task-things_space-T1w_model-fitHrfGLMdenoiseRR_stat-noiseCeilings_statmap.nii.gz``, noise-ceiling brain maps derived from the main THINGS task.
 - ``sub-{sub_num}_parcel-kanwisher_space-T1w_res-anat_contrast-*_desc-{L, R}_pseg.nii.gz``, group-derived ROI masks warped to subjects' native (T1w) space computed in Step 3.
 
 **Output**:
 -  ``sub-{sub_num}_parcel-kanwisher_space-T1w_res-func_contrast-*_desc-{L, R}_mask.nii.gz``, binarized group-derived ROI masks (from atlas) resampled to match subjects' functional (epi) resolution.
-- For each ROI (e.g., ``contrast-face_roi-FFA``), ``sub-{sub_num}_task-floc_space-T1w_stats-tscores_contrast-*_roi-*_cutoff-*_nvox-*_fwhm-*_ratio-*_desc-{smooth, unsmooth}_mask.nii.gz``, an ROI binary mask (volume) in T1w space that corresponds to the union between the group-derived ROI mask (warped to subject space) and voxels with above-cutoff t-scores for the relevant fLoc contrast.
-- For ``sub-06``, who did not complete the fLoc task, ROI masks ``sub-{sub_num}_task-floc_space-T1w_stats-noiseCeil_contrast-*_roi-*_cutoff-*_nvox-*_fwhm-*_mask.nii.gz`` correspond to the union between the group-derived ROI mask and voxels with above-threshold noise ceilings derived from the main THINGS task.
+- For each ROI (e.g., ``contrast-face_roi-FFA``), ``sub-{sub_num}_task-floc_space-T1w_stat-tscores_contrast-*_roi-*_cutoff-*_nvox-*_fwhm-*_ratio-*_desc-{smooth, unsmooth}_mask.nii.gz``, an ROI binary mask (volume) in T1w space that corresponds to the union between the group-derived ROI mask (warped to subject space) and voxels with above-cutoff t-scores for the relevant fLoc contrast.
+- For ``sub-06``, who did not complete the fLoc task, ROI masks ``sub-{sub_num}_task-floc_space-T1w_stat-noiseCeil_contrast-*_roi-*_cutoff-*_nvox-*_fwhm-*_mask.nii.gz`` correspond to the union between the group-derived ROI mask and voxels with above-threshold noise ceilings derived from the main THINGS task.
 
 ------------
 ## Step 6. Visualize manually drawn ROIs on cortical flat maps with Pycortex
